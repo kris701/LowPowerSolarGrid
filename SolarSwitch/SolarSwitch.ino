@@ -4,8 +4,6 @@
 #define PIN_SENSITIVITY_DOWN A2
 #define PIN_SENSOR A3
 
-#define PIN_LED 13
-
 #define PIN_RELAY_SIGNAL 4
 #define PIN_RELAY_RESET 3
 

@@ -14,6 +14,15 @@
     <File Path="PCBs/SolarSwitch/solarSwitch.brd" />
     <File Path="PCBs/SolarSwitch/solarSwitch.sch" />
   </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".gitignore" />
+    <File Path="LICENSE" />
+    <File Path="README.md" />
+  </Folder>
+  <Project Path="PowerSwitch/PowerSwitch.vcxproj" Id="b4b04f1f-3fe6-4bd6-b36b-211f9f7f9c44">
+    <Platform Solution="*|x86" Project="x86" />
+    <Deploy />
+  </Project>
   <Project Path="SolarSwitch/SolarSwitch.vcxproj" Id="5f663af5-296b-4b7f-bfca-62495f23eb88">
     <Platform Solution="*|x86" Project="x86" />
     <Deploy />
