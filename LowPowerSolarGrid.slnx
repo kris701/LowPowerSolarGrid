@@ -1,0 +1,21 @@
+<Solution>
+  <Configurations>
+    <Platform Name="ARM" />
+    <Platform Name="ARM64" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/PCBs/" />
+  <Folder Name="/PCBs/PowerSwitch/">
+    <File Path="PCBs/PowerSwitch/powerSwitch.brd" />
+    <File Path="PCBs/PowerSwitch/powerSwitch.sch" />
+  </Folder>
+  <Folder Name="/PCBs/SolarSwitch/">
+    <File Path="PCBs/SolarSwitch/solarSwitch.brd" />
+    <File Path="PCBs/SolarSwitch/solarSwitch.sch" />
+  </Folder>
+  <Project Path="SolarSwitch/SolarSwitch.vcxproj" Id="5f663af5-296b-4b7f-bfca-62495f23eb88">
+    <Platform Solution="*|x86" Project="x86" />
+    <Deploy />
+  </Project>
+</Solution>
