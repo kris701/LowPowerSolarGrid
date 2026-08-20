@@ -21,24 +21,69 @@ Adafruit_SSD1306 display(128, 32, &Wire, -1);
 bool onBattery = false;
 bool manuallySet = false;
 bool justSwitched = false;
+bool showStat = true;
 
-uint16_t minVoltage = 400;
-uint16_t maxVoltage = 1000;
+uint16_t minVoltage = 800;
+uint16_t maxVoltage = 900;
 uint16_t voltageMap[] = {
-	300,
-	350,
-	400,
-	450,
-	500,
-	550,
-	600,
-	650,
-	700,
 	750,
+	760,
+	770,
+	780,
+	790,
 	800,
+	810,
+	820,
+	830,
+	840,
 	850,
+	860,
+	870,
+	880,
+	890,
 	900,
-	950,
+	910,
+	920,
+	930,
+	940
+};
+
+static const unsigned char PROGMEM logo_battery[] =
+{ 0b00000000, 0b00000000,
+  0b00000000, 0b00000000,
+  0b00000000, 0b00000000,
+  0b00000000, 0b00000000,
+  0b11111111, 0b11111000,
+  0b11111111, 0b11111000,
+  0b11111111, 0b11111110,
+  0b11111111, 0b11111110,
+  0b11111111, 0b11111110,
+  0b11111111, 0b11111110,
+  0b11111111, 0b11111000,
+  0b11111111, 0b11111000,
+  0b00000000, 0b00000000,
+  0b00000000, 0b00000000,
+  0b00000000, 0b00000000,
+  0b00000000, 0b00000000 
+};
+
+static const unsigned char PROGMEM logo_live[] =
+{ 0b00000000, 0b00000000,
+  0b00000000, 0b00000000,
+  0b00000000, 0b00000000,
+  0b00000111, 0b11000000,
+  0b00001111, 0b11000000,
+  0b00001111, 0b11111000,
+  0b11111111, 0b11111000,
+  0b11111111, 0b11000000,
+  0b11111111, 0b11111000,
+  0b00001111, 0b11111000,
+  0b00001111, 0b11000000,
+  0b00000111, 0b11000000,
+  0b00000000, 0b00000000,
+  0b00000000, 0b00000000,
+  0b00000000, 0b00000000,
+  0b00000000, 0b00000000
 };
 
 void setup() {
@@ -59,8 +104,6 @@ void setup() {
 	display.println(F("Please Wait..."));
 	display.setCursor(0, 0);
 	display.display();
-
-	delay(4000);
 
 	pinMode(PIN_TOGGLE, INPUT_PULLUP);
 	pinMode(PIN_STAT, INPUT_PULLUP);
@@ -84,6 +127,11 @@ void setup() {
 
 void loop() {
 	uint16_t sensorValue = getReadingAvg(PIN_SENSOR);
+#ifdef DEBUG
+	Serial.print("Sensor: ");
+	Serial.println(sensorValue);
+#endif
+
 	if (onBattery) {
 		if (sensorValue < minVoltage) {
 			onBattery = false;
@@ -105,7 +153,7 @@ void loop() {
 		switchState();
 
 		display.clearDisplay();
-		display.setCursor(0, 0);
+		display.setCursor(25, 18);
 		display.print(F("Set To: "));
 		if (onBattery) {
 			display.println(F("Bat"));
@@ -120,12 +168,24 @@ void loop() {
 		display.clearDisplay();
 		display.display();
 	}
-	if (digitalRead(PIN_STAT) || justSwitched) {
+	if (digitalRead(PIN_STAT)) {
+		showStat = !showStat;
+	}
+
+	if (showStat || justSwitched) {
 		display.clearDisplay();
-		display.setCursor(0, 0);
-		display.print(F("Sense: "));
+		if (onBattery) {
+			display.drawBitmap(30, 0, logo_battery,15,15, SSD1306_WHITE);
+		}
+		else {
+			display.drawBitmap(30, 0, logo_live, 15, 15, SSD1306_WHITE);
+		}
+		display.setCursor(50, 0);
+		display.setTextSize(2);
 		display.print((String)getBatteryPercent(sensorValue));
 		display.println(F("%"));
+		display.setTextSize(1);
+		display.setCursor(0, 15);
 
 		if (onBattery) {
 			if (justSwitched) {
@@ -143,8 +203,7 @@ void loop() {
 				display.println(F("Live"));
 			}
 		}
-		display.println();
-		
+
 		display.print(F("Min: "));
 		display.print((String)getBatteryPercent(minVoltage));
 		display.print(F("%. "));
@@ -152,9 +211,9 @@ void loop() {
 		display.print((String)getBatteryPercent(maxVoltage));
 		display.println(F("%"));
 		display.display();
-
-		LowPower.idle(SLEEP_4S, ADC_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_OFF, SPI_OFF, USART0_OFF, TWI_OFF);
-
+	}
+	else
+	{
 		display.clearDisplay();
 		display.display();
 	}
@@ -187,14 +246,16 @@ void switchState() {
 }
 
 uint8_t getBatteryPercent(uint16_t voltage) {
-	uint16_t total = sizeof(voltageMap);
-	uint16_t index = 0;
+	uint8_t total = sizeof(voltageMap) / 2;
+	uint8_t index = 0;
 	for (uint8_t i = 0; i < total; i++) {
 		if (voltageMap[i] > voltage)
 			break;
 		index = i;
 	}
-	uint8_t percent = ((float)index / (float)total) * 100;
+	if (index > total)
+		index = total;
+	uint8_t percent = ((float)index / ((float)total)) * 100;
 #ifdef DEBUG
 	Serial.print("Percentage: ");
 	Serial.print(percent);
