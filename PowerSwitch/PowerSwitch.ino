@@ -6,8 +6,8 @@
 
 #define PIN_SENSOR A1
 
-#define PIN_RELAY_SIGNAL 4
-#define PIN_RELAY_RESET 3
+#define PIN_RELAY_SIGNAL 3
+#define PIN_RELAY_RESET 4
 
 #define PIN_TOGGLE 5
 #define PIN_STAT 6
