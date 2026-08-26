@@ -24,7 +24,7 @@ bool justSwitched = false;
 bool showStat = true;
 
 uint16_t minVoltage = 800;
-uint16_t maxVoltage = 900;
+uint16_t maxVoltage = 930;
 uint16_t voltageMap[] = {
 	750,
 	760,
