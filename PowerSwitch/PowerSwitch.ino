@@ -24,7 +24,7 @@ bool justSwitched = false;
 bool showStat = true;
 
 uint16_t minVoltage = 800;
-uint16_t maxVoltage = 930;
+uint16_t maxVoltage = 920;
 uint16_t voltageMap[] = {
 	750,
 	760,
@@ -44,8 +44,7 @@ uint16_t voltageMap[] = {
 	900,
 	910,
 	920,
-	930,
-	940
+	930
 };
 
 static const unsigned char PROGMEM logo_battery[] =
