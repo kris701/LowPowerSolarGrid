@@ -1,3 +1,4 @@
+#include <EEPROM.h>
 #include <SPI.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h>
@@ -22,6 +23,9 @@ bool onBattery = false;
 bool manuallySet = false;
 bool justSwitched = false;
 bool showStat = true;
+
+float batTime = 0;
+float time = 1;
 
 uint16_t minVoltage = 800;
 uint16_t maxVoltage = 920;
@@ -104,6 +108,8 @@ void setup() {
 	display.setCursor(0, 0);
 	display.display();
 
+	int value = EEPROM.read(0);
+
 	pinMode(PIN_TOGGLE, INPUT_PULLUP);
 	pinMode(PIN_STAT, INPUT_PULLUP);
 
@@ -112,10 +118,20 @@ void setup() {
 	pinMode(PIN_RELAY_RESET, OUTPUT);
 	digitalWrite(PIN_RELAY_RESET, 1);
 
-	delay(100);
-	digitalWrite(PIN_RELAY_RESET, 0);
-	delay(100);
-	digitalWrite(PIN_RELAY_RESET, 1);
+	if (value == 1) {
+		onBattery = true;
+		delay(100);
+		digitalWrite(PIN_RELAY_SIGNAL, 0);
+		delay(100);
+		digitalWrite(PIN_RELAY_SIGNAL, 1);
+	}
+	else {
+		onBattery = false;
+		delay(100);
+		digitalWrite(PIN_RELAY_RESET, 0);
+		delay(100);
+		digitalWrite(PIN_RELAY_RESET, 1);
+	}
 
 #ifdef DEBUG
 	Serial.println("System active.");
@@ -164,6 +180,10 @@ void loop() {
 
 		LowPower.idle(SLEEP_4S, ADC_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_OFF, SPI_OFF, USART0_OFF, TWI_OFF);
 
+		time += 2;
+		if (onBattery)
+			batTime += 2;
+
 		display.clearDisplay();
 		display.display();
 	}
@@ -188,20 +208,25 @@ void loop() {
 
 		if (onBattery) {
 			if (justSwitched) {
-				display.println(F("Live => Bat"));
+				display.print(F("Live => Bat"));
 			}
 			else {
-				display.println(F("Bat"));
+				display.print(F("Bat"));
 			}
 		}
 		else {
 			if (justSwitched) {
-				display.println(F("Bat => Live"));
+				display.print(F("Bat => Live"));
 			}
 			else {
-				display.println(F("Live"));
+				display.print(F("Live"));
 			}
 		}
+
+		display.print(F(" (Bat "));
+		uint8_t percent = (batTime / time) * 100;
+		display.print((String)percent);
+		display.println(F("%)"));
 
 		display.print(F("Min: "));
 		display.print((String)getBatteryPercent(minVoltage));
@@ -218,6 +243,10 @@ void loop() {
 	}
 
 	LowPower.idle(SLEEP_2S, ADC_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_OFF, SPI_OFF, USART0_OFF, TWI_OFF);
+
+	time++;
+	if (onBattery)
+		batTime++;
 
 	justSwitched = false;
 }
@@ -236,11 +265,13 @@ void switchState() {
 		digitalWrite(PIN_RELAY_SIGNAL, 0);
 		delay(100);
 		digitalWrite(PIN_RELAY_SIGNAL, 1);
+		EEPROM.write(0, 1);
 	}
 	else {
 		digitalWrite(PIN_RELAY_RESET, 0);
 		delay(100);
 		digitalWrite(PIN_RELAY_RESET, 1);
+		EEPROM.write(0, 0);
 	}
 }
 
